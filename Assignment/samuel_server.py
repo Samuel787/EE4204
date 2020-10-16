@@ -5,11 +5,11 @@ import time
 
 POSITIVE_ACK = "pack".encode("utf-8")
 NEGATIVE_ACK = "nack".encode("utf-8")
-PORT = [5000, 5001]
+PORT = [i for i in range(5000, 5050, 1)]
 HOST = "127.0.0.1"
 ACK_SIZE = 4
-PACKET_SIZE = 1024
-CRC = "101101001000111"
+PACKET_SIZE = 256
+CRC = "1011010010101110110110100101011101"
 
 def xor(a, b): 
     result = [] 
@@ -65,6 +65,7 @@ def RecvFile(sock):
         except Exception as e:
             print("Exception in receiving file size")
             print(e)
+            file_size_correctly_received = False
             sock.send(NEGATIVE_ACK)
             print("Sent negative ack for file size")
         global_counter += 1
@@ -73,35 +74,61 @@ def RecvFile(sock):
     received_size = 0
     f = open("Received_file.txt", "wb")
     while received_size < file_size:
-        msg_correctly_received = False
-        while not msg_correctly_received:
+        file_content_correctly_received = False
+        while not file_content_correctly_received:
             data = sock.recv(PACKET_SIZE)
-            # do some checking of the message
             if data:
                 data = data.decode("utf-8")
                 print(f"Received: {data}")
                 remainder = decodeData(data, CRC)
                 if int(remainder) == 0:
-                    msg_correctly_received = True
-                if msg_correctly_received:
+                    file_content_correctly_received = True
+                if file_content_correctly_received:
                     data = data[:-(len(CRC) - 1)]
                     received_size += len(data)
                     print(f"Received this much data so far: {received_size}")
                     f.write(data.encode("utf-8"))
                     print("Sending Positive Ack")
-                    sock.send(POSITIVE_ACK)
+                    sock.send(POSITIVE_ACK) 
                 else:
                     print("Sending Negative Ack")
                     sock.send(NEGATIVE_ACK)
                 global_counter += 1
                 print(str(global_counter))
-                print("\n")
+                print("\n")           
+
+    # received_size = 0
+    # f = open("Received_file.txt", "wb")
+    # while received_size < file_size:
+    #     msg_correctly_received = False
+    #     while not msg_correctly_received:
+    #         data = sock.recv(PACKET_SIZE)
+    #         # do some checking of the message
+    #         if data:
+    #             data = data.decode("utf-8")
+    #             print(f"Received: {data}")
+    #             remainder = decodeData(data, CRC)
+    #             if int(remainder) == 0:
+    #                 msg_correctly_received = True
+    #             if msg_correctly_received:
+    #                 data = data[:-(len(CRC) - 1)]
+    #                 received_size += len(data)
+    #                 print(f"Received this much data so far: {received_size}")
+    #                 f.write(data.encode("utf-8"))
+    #                 print("Sending Positive Ack")
+    #                 sock.send(POSITIVE_ACK)
+    #             else:
+    #                 print("Sending Negative Ack")
+    #                 sock.send(NEGATIVE_ACK)
+    #             global_counter += 1
+    #             print(str(global_counter))
+    #             print("\n")
     end_time = time.time()
     print("File successfully received complete")
     through_put = calculate_throughput(file_size, (end_time - start_time))
     
 
-    f.close()
+    #f.close()
 
 def calculate_throughput(file_size, transfer_time):
     through_put = file_size * 8 / transfer_time
