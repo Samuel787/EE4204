@@ -7,14 +7,15 @@ import copy
 
 PORT = [i for i in range(5000, 5050, 1)]
 HOST = "127.0.0.1"
-FILE_TO_SENT = "sample.txt"
+FILE_TO_SENT = "big.txt"
 POSITIVE_ACK = "pack".encode("utf-8")
 NEGATIVE_ACK = "nack".encode("utf-8")
 ACK_SIZE = 4
-PACKET_SIZE = 256
-CRC = "1011010010101110110110100101011101"
+PACKET_SIZE = 4096
+CRC = "10110100101011111011010010101111"
 CORRUPT_INTENSITY = 0.05
-ERROR_PROBABILITY = 0.5
+ERROR_PROBABILITY = 0.1
+PACKET_LOSS_PROBABILITY = 0
 
 def xor(a, b): 
     result = [] 
@@ -88,6 +89,7 @@ def SendFile():
         while sent_size < file_size:
             file_content_correctly_sent = False
             bytesToSend = f.read(PACKET_SIZE - len(CRC) + 1)
+            print(f"bytesToSend: {bytesToSend}")
             temp = copy.copy(bytesToSend)
             while not file_content_correctly_sent:
                 if temp == "":
@@ -96,22 +98,33 @@ def SendFile():
                 print(f"Sending file content msg: {bytesToSend}")
                 bytesToSend = pre_process_before_send(bytesToSend, CORRUPT_INTENSITY, ERROR_PROBABILITY)
                 bytesToSend = bytesToSend.encode("utf-8")
-                s.send(bytesToSend)
+                if random.random() >= PACKET_LOSS_PROBABILITY:
+                    s.send(bytesToSend)
+                else:
+                    print("Simulating packet loss")
                 while True:
-                    ack = s.recv(ACK_SIZE)
-                    if ack == POSITIVE_ACK:
-                        sent_size += (PACKET_SIZE - len(CRC) + 1)
-                        print("Received positive Ack for content")
-                        file_content_correctly_sent = True
-                        break
-                    elif ack == NEGATIVE_ACK:
-                        print("Received negative Ack for content")
+                    s.settimeout(0.1)
+                    try:
+                        ack = s.recv(ACK_SIZE)
+                        if ack == POSITIVE_ACK:
+                            sent_size += (PACKET_SIZE - len(CRC) + 1)
+                            print("Received positive Ack for content")
+                            file_content_correctly_sent = True
+                            break
+                        elif ack == NEGATIVE_ACK:
+                            print("Received negative Ack for content")
+                            file_content_correctly_sent = False
+                            break
+                        else:
+                            print("Should never enter this state")
+                    except Exception as e:
+                        print(e)
+                        print("acknowledgement time out")
                         file_content_correctly_sent = False
-                        break
-                    else:
-                        print("Should never enter this state")
+                        break;
                 global_counter += 1
                 print(str(global_counter))
+
     print("File successfully transferred")
 
 # def corrupt_data(message, corrupt_intensity):

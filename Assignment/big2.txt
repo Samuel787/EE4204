@@ -1,0 +1,507 @@
+HOMEWORK 3
+1. What are the benefits of IPv6 over IPv4?
+a) IPv6 contains no IP-level checksum. Since the checksum does not need to be
+calculated at each router hop, this reduces the overall processing time and
+results in more efficient packet processing.
+b) IPv6 reduces the size of routing tables and makes routing more efficient and
+hierarchical. In IPv6 networks, fragmentation is handled by the source device,
+rather than a router, using a protocol for discovery of the path’s maximum
+transmission unit. This results in more efficient routing.
+c) IPv6 devices can independently auto-configure themselves when connected
+to other IPv6 devices. Configuration tasks that can be carried out
+automatically include IP address assignment and device numbering. This
+results in a simplified network configuration.
+d) IPv6 supports multicast rather than broadcast. Multicast allows
+bandwidth-intensive packet flows to be sent to multiple destinations
+simultaneously, saving network bandwidth.
+e) Larger address space (2^128)
+2. Describe both Link-State & Distance Vector approaches to routing.
+Link-state
+node’s table is used by other nodes
+Link-State
+Dijkstra algorithm
+Has the full and complete information on the network topology
+Metric used for best path calculation is Cost
+Has a hierarchical structure with intermediate nodes
+High CPU and memory utilization
+Requires a trained network administrator
+Distance Vector
+Bellman ford algorithm
+Topology information is received from the neighbour’s point of view
+Metric used for best path calculation is distance(hops)
+Doesn’t have a hierarchical structure
+Low CPU and memory utilization
+Simple to implement and manage
+3. Classify RIP/OSPF/BGP according to the following metrics: LS or DV, Intra-AS
+or Inter-AS, Centralized or Distributed
+Routing Information Protocol (RIP): DV, Intra-AS, Distributed
+Open Shortest Path First (OSPF): LS, Intra-AS, Centralised
+Border Gateway Protocol (BGP): DV, Inter-AS, Distributed
+4. Many network engineering problems are about resource allocation – namely
+the allocation of a set of finite resources amongst users with certain needs.
+Suppose there are 3 users competing for a 90 mbps link. Users 1 and 2 want 50
+mbps each and User 3 wants 10 mbps. My solution is to give each one 30
+mbps. Is this fair?
+It is hard to define what is fair but there are basically 3 ways to do this allocation.
+Equal, Proportional and max-min. In the equal solution, we give 90/3 = 30mbps
+for each and every of the users regardless of the amount of bandwidth the users
+require. In the proportional solution, what we do is to first compare the 3 users
+in terms of ratio. 50:50:10 simplified into 5:5:1. Hence with 90mbps link,
+(90/11)*5 is approximated to 41mbps for each of the users that requires
+50mbps and (90/11)*1 is approximated to 8mbps for the user that requires
+10mbps. Lastly, in the max-min solution, it is the ‘maximize happiness’ strategy
+whereby we first give all of them 10mbps, hence 10mbps for user 1, 10mbps for
+user 2 and 10mbps for user 3, leaving us with 60mbps. From there, we continue
+giving equal amounts of bandwidth to user 1 and user 2 until there is no
+bandwidth left since user 3 is already ‘happy’ with the 10mbps it has. In such a
+way, it will be an end result of 40mbps for user 1, 40mbps for user 2 and 10mbps
+for user 3. Personally, I think giving each user 30mbps is the ‘lazy’ solution and
+the optimal solution is the proportional method but at the end of the day, it really
+depends on the situation.
+5. We discussed max-min fairness in class. What is the max-min fair allocation?
+What is the TCP fair solution?
+Max-min fair allocation:
+1. Resources are allocated in order of increasing demand
+2. No sources get a resource share larger than its demand
+3. Sources with unsatisfied demand get an equal share of the resource
+By following the above principles, max-min allocation is said to be achieved by an
+allocation if and only if the allocation is feasible and an attempt to increase the
+allocation of any sources necessarily results in the decrease in the allocation of some
+other sources with an equal or smaller allocation. In layman’s terms, max-min
+allocation allocates a source with a "small" demand what it wants, and evenly
+distributes unused resources to the "big" users.
+TCP fair solution: TCP fairness requires that a new protocol receive no larger share
+of the network than a comparable TCP flow. Therefore, TCP goes for equal
+distribution of resources to ensure fairness.
+Take for example 4 users, user A, B, C and D with a demand of 2, 2.6, 4 and 5 mbps
+respectively and a link capacity of 10mbps.
+First off, we notice immediately that 2*4 = 8 and satisfies user A completely and thus
+we are left with user B, C and D with a link capacity remaining of 2mbps.
+Next, 2.6-2 = 0.6mbps and 0.6*3 = 1.8mbps. We have now satisfied user B
+completely and are left with 10-8-1.8 = 0.2mbps to satisfy user C and D.
+Since user C and D are unable to be satisfied completely with a link capacity
+remaining of 0.2mbps, we give each of them 0.1mbps thus resulting in an end
+bandwidth allocation of 2mbps, 2.6mbps, 2.7mbps and 2.7mbps respectively for user
+A, B, C, D.
+This can also be thought of as the ‘maximize happiness’ allocation since we aim to
+completely satisfy the maximum number of users with the limited amount of
+bandwidth capacity we are given with.
+TCP slow start can be considered a progressive filling algorithm where resources are
+not immediately allocated to requesting hosts when available. Instead, it is gradually
+provided amongst current participants and when exhausted stop for all.
+According to this article at least, progressive filling algorithms provide min max
+fairness.
+https://en.m.wikipedia.org/wiki/Max-min_fairness
+6. Consider the communication graph below. The edge labels are of the form a /
+b, where a is the cost in dollars of using that link and b is the delay in seconds
+of using that link. Run Dijkstra’s algorithm on this graph and find the optimal
+route from A to E.
+Optimal route from A to E (cost)
+A → D → E (cost = 7)
+Optimal route from A to E (delay)
+A → C → B → E (delay = 7)
+7. For the communication graph above, state the distance vector table that would
+be computed by node D using the distance vector algorithm.
+Node D distance vector table (cost)
+From
+Cost to
+A B C D E
+A 0 2 3 3 7
+B 2 0 2 4 6
+C 3 2 0 2 6
+D 3 4 2 0 4
+E 7 6 6 4 0
+Node D distance vector table (delay)
+From
+Cost to
+A B C D E
+A 0 5 1 4 7
+B 5 0 4 6 2
+C 1 4 0 3 6
+D 4 6 3 0 4
+E 7 2 6 4 0
+8. Did you notice that the previous two questions (6 & 7) were not well defined?
+Remember that when you see the word “optimal”, you should first ask what is
+the optimality metric? Is it cost? Or is it delay? Compute both the
+delay-optimal and cost-optimal routes.
+See answers 6 & 7. This “question” is so dumb. I’m agree
+9. In the resource allocation problem, you were asked to compute a “fair”
+solution. Again, you need to ask first what is the fairness metric? What are
+some notions of fairness?
+Fairness metrics:
+a) Equal distribution of resources
+b) Distribution proportional to current demand
+c) Distribution based on the max-min fairness principle
+Some of the metrics for fairness is
+- Equal distribution solution. Everyone is given the SAME amount of resources
+regardless of anything else.
+- Proportional distribution solution. Everyone has the SAME RATIO of given
+resource:required resource. This means that everyone is EQUALLY HAPPY.
+- Max-min solution. Try to MAXIMIZE the number of COMPLETELY SATISFIED
+user(s).
+10. Compare the Dijkstra Shortest Spanning Tree to the Minimum-cost Broadcast
+Spanning Tree for the graph in Question 6.
+For minimal cost, assuming A is source:
+DSST: A->C, A->B, A->D->E
+MBST: A->B->C->D->E
+For minimum delay, assuming A is source:
+DSST: A->C->B->E, A->D
+MBST: A->C->B->E, C->D
+11. Consider a wireless network. Does carrier sensing always work in wireless
+networks? What MAC does WiFi (802.11) use? Describe it and compare it to the
+MAC used in Ethernet.
+802.11(WiFi) uses Carrier Sense Multiple Access with Collision Avoidance (CSMA/CA)
+Ethernet uses Carrier Sense Multiple Access with Collision Detection (CSMA/CD)
+ CSMA/CD retransmit data frames whenever a collision occurs(DETECTED) while
+CSMA/CA first broadcasts its intention to send before the actual data transmission thus
+allowing for the AVOIDANCE. In short, CSMA/CD takes effect after a collision while
+CSMA/CA takes effect before a collision.
+Ethernet uses CSMA/CD since ethernet is wired and thus we are able to detect whether
+a collision has occurred whereas in a wireless connection (802.11), is it not possible for
+the transmitter to detect a collision and thus, we use CSMA/CA.
+Homework 3 is due on Wed 8 April 2020 23:59h.
+Quiz 2 will be held on Monday 13 April 2020, 10:00h. Quiz 2 will include the topics we
+covered in Part 2. Quiz 2 will be online in LumiNUS.
+How do you guys wanna do this?
+HOMEWORK 2
+1. Retransmission of lost data can be done at the link, transport, and application
+layers. What are the pros and cons of doing it at each layer?
+Link: Packets sent over the same link and not dropped at receiver, at the risk of
+interference with higher layer protocol’s retransmissions.
+Transport: Applications able to use same transport layer protocol while another is
+doing retransmission, but can only start from sender, not in the middle
+Application: Knows what information is required during retransmission, but inefficient
+Data Link layer
+1. Greatly improves the efficiency of retransmissions of lost data since link layer
+only involves hop-by-hop transmissions. Since transport and application
+layers involve end-to-end transmissions, retransmissions of lost data in these
+layers incur higher latency.
+2. A packet may be retransmitted at multiple layers simultaneously. For
+instance, a packet may be delayed before reaching a wireless link. The link
+layer protocol proceeds to retransmit the packet. At the same time, the sender
+times out and proceeds to retransmit the packet as well (transport layer). This
+results in unnecessary overhead.
+Transport layer
+1. Implementing retransmissions at the transport layer eliminates the need to
+implement retransmission functionalities in applications. Many applications
+can utilise the same transport protocol implemented in the operating system.
+By doing so, it reduces bugs and the overall implementation time.
+Application layer
+1. Some applications (e.g. video applications) can tolerate losses much better
+than the increased delays of retransmissions. Therefore, this essentially
+eliminates the need for retransmissions at the link and transport layer,
+reducing overhead.
+2. Data may be lost above the transport layer due to issues such as a buggy
+proxy cache.
+From Berkeley Exam Paper
+2. Compare Implicit versus Explicit congestion signals. What are the advantages
+and disadvantages of each?
+Implicit do not need intermediate router support, but risk packet loss during
+congestion issues.
+Explicit prevents dropping of packets, but increase in packets during congestion may
+cause traffic control to fail.
+Also from Berkeley paper
+3. What are the main functions of the transport layer? Describe briefly.
+Multiplexing of multiple communication streams from many users or
+applications on the same network.
+Identifying the applications and services on the client and server that should
+handle transmitted data.
+Ensure that the complete message arrives at the destination and in the proper
+order. Congestion control and flow control is also done here.
+Congestion control is about not causing congestion on the intermediate routers
+as the packet is on its way to the receiver and the algorithm used to implement
+this function is the AIMD (additive increase/multiplicative decrease), as well as
+many others such as slow start and congestion window.
+Flow control is about not causing a congestion at the receiver and is dictated by
+the receiver using the advertisement window flag sent by the receiver to the
+sender. This is to prevent the rate of transmission from the sender to the
+receiver to be too high for the receiver to manage.
+The transport layer deals with the coordination of the data transfer between end
+systems and hosts (how much data to send, at what rate, where it goes, etc.).
+Essentially, the transport layer is responsible for the reliable transmission of data
+segments between end systems in a network (end-to-end reliability).
+1. Sequencing mechanism (sequence numbers) ensures in-order delivery of
+data to the destination.
+2. Error detection mechanism (checksum) ensures that corrupted data is
+detected at the receiver.
+3. Acknowledgements mechanism ensures that retransmissions of data are
+performed when needed (e.g. after receiving a “NACK” from the receiver)
+4. Congestion control mechanism (AIMD, slow start, congestion window)
+ensures that the network is not overwhelmed.
+5. Flow control mechanism (advertisement window) ensures that the receiver is
+not overwhelmed by the sender.
+4. How does the transport layer perform multiplexing and demultiplexing?
+Host receives IP datagrams during multiplexing and directs IP datagrams to
+respective segments during demultiplexing
+Multiplexing and demultiplexing are necessary since the communication channel is
+shared. The transport layer performs multiplexing and demultiplexing using port
+numbers. A socket is the interface through which a process communicates with the
+transport layer. It is bound to a port number so that the TCP layer can identify the
+application that data is destined to be sent to. Each process can potentially use many
+sockets.
+The transport layer in the receiver receives a sequence of segments from its network
+layer, delivering segments to the correct socket (and subsequently process) is called
+demultiplexing.
+Assembling segments with the necessary information and passing them to the
+network layer is called multiplexing.
+5. Why does TCP wait for three duplicate acknowledgments before retransmitting
+a packet? What do the triple duplicate acks represent?
+Why? Idk :(. SYN, SYN ack, Ack.
+There is nothing special about waiting for three duplicate acknowledgements
+before retransmitting a packet in TCP. It simply worked well using three
+duplicate acknowledgements as a ‘threshold’ or ‘sweet spot’. The triple duplicate
+acks allows the sender to realize that a packet that it tried to transmit has been
+lost.
+6. How does TCP set its timeout value?
+The timeout is an estimate of the RTT since the sender expects the ACK after the
+RTT and the sender can estimate the RTT by watching the ACKs.
+7. TCP congestion avoidance is done via AIMD. Explain.
+AIMD is the behavior of linear growth of the congestion window when no
+congestion is detected along with an exponential reduction when congestion is
+detected. In TCP, congestion avoidance is done via AIMD. First off, TCP starts
+with an initial slow start which is an act of exponential increase of the congestion
+window as long as timeout is not detected. However, once a timeout is detected,
+TCP restarts its congestion window and starts off with a slow start to the halfway
+point of the known congestion window that led to a timeout. From then on, it
+implements the AIMD behavior which is to linearly add on to the congestion
+window and once a triple duplicate ACK is noticed, it does a ‘backing off’ which is
+the multiplicative decrease (halving of the congestion window) and allow the
+linear addition of the congestion window to continue on from there. From this
+behavior, we can see that timeouts are treated very seriously since TCP will reset
+the congestion window and restart the process of slow starting to the halfway
+mark of the known congestion window that caused the timeout. A triple
+duplicate ACK on the other hand is treated more leniently in a sense that it does
+not restart the entire congestion window and instead allows for the linear
+addition process to start at the halfway mark of the congestion window value
+that resulted in the triple duplicate ACK. The above described is TCP Reno. In
+TCP Tahoe however, it acts the same way for both triple duplicate ACK and
+timeout.
+AIMD comprises 2 characteristics:
+1. Linear growth of congestion window when no congestion is detected
+2. Exponential reduction of congestion window when congestion is detected.
+The sender adaptively probes the network congestion limits with data segments. It
+keeps expanding the congestion window (1 packet per RTT) until a segment is lost.
+The CW is contracted (halved) then. The sender then continues with this
+expand/contract cycle throughout connection, resulting in a sawtooth behaviour. This
+cycle essentially results in congestion avoidance.
+8. What is the goal of network fairness? Is TCP fair? If so, explain what resources
+TCP allocates in a fair manner.
+Goal: Ensure resources are distributed fairly.
+TCP is fair as AI gives slope of 1 as throughput increases, and MD decreases
+throughput proportionately.
+The goal of network fairness is to ensure that users or applications are receiving
+a fair share of the network bandwidth. TCP is fair as it uses the AIMD algorithm
+which is fair due to the efficiency in the allocation of resources because no
+matter what it does, be it AI or MD, it moves towards the optimal point, better
+visualized in the image below.
+9. What is the throughput of TCP?
+The throughput is the average rate that packets are successfully decoded at the
+receiver. Note that the rate that packets are sent by the sender is an upper bound on
+the actual throughput and since it is easily computable, we use it to estimate the
+throughput. Thus, the sending rate(throughput) is equals to W*MSS/RTT whereby
+W = the number of segments
+MSS = Maximum Segment Size
+RTT = Round Trip Time
+TCP throughput, which is the rate that data is successfully delivered over a TCP
+connection, is an important metric to measure the quality of a network connection.
+TCP throughput is bounded by two mechanisms, flow control, where receiving hosts
+can limit the rate of incoming data to what they are able to process, and congestion
+control, where transmitting hosts limit their outgoing data rate to moderate their
+negative impact on the network.
+TCP flow control limits throughput to a value approximating:
+Throughput=WindowSize/RTT
+Where WindowSize is the amount of data the receiving host is prepared to accept
+without explicit acknowledgment and RTT is the round-trip-time for the end-to-end
+network path.
+10. We said that the goal of the transport layer (layer 4) was end-to-end reliability.
+Recall that layer 2 also has reliability, but it is hop-by-hop reliability. Why do
+we have reliability at both layers? Are they both necessary?
+In each layer they can act as a failsafe and a way to quickly restore retransmission.
+Layer 4 reliability can function without layer 2 reliability, but not vice-versa. However
+with layer 2 reliability, it can aid in improving efficiency as it can retransmit at each
+link, instead of retransmitting at all links if one of it fails.
+Carry me this question plz vernon.
+HOMEWORK 1
+1. As a communication systems engineer, what are the metrics you would use in
+system design?
+Modularity: function call fan-in and fan-out. Test adequacy: coverage, detection rate.
+Depending on what the system design needs, the metric should be chosen as
+accordingly.
+It would depend on what the system wants to prioritize. For example, if it prioritizes
+guaranteed service instead of link utilization, the system can be built using circuit
+switching. However, if the system prioritizes link utilization instead of guaranteed
+service, the system can be built using packet switching
+Based on requirements, some possible metrics like latency, up-time, packet loss
+rates and throughput can be considered.
+Reliability: bit error rate, up-time, packet loss rate
+Performance: throughput, latency
+Efficiency: power, energy
+Costs: design, service
+Depending on the stipulated requirements, different metrics would be prioritised over
+the others. For example, if guaranteed QoS is necessary, the system will be
+designed with circuit switching as its backbone. This prioritises performance but
+results in a trade-off in efficiency and costs.
+2. Describe the layers and corresponding functions of the OSI reference model.
+What layers comprise the TCP/IP stack?
+Layer 1: Physical Layer
+It comprises the transmission and reception of raw bit streams over a physical medium
+Layer 2: Data Link Layer
+It comprises of the reliable transmission of data frames between 2 nodes connected by a
+physical layer
+Layer 3: Network Layer
+It comprises the structuring and managing of a multi-node network.
+Layer 4: Transport Layer
+It comprises of the reliable transmission of data segments between points in a network
+Layer 5: Session Layer
+It comprises of the management of communication sessions between nodes
+Layer 6: Presentation Layer
+It comprises of the translation and manipulation of data between a networking service and
+application
+Layer 7: Application Layer
+It comprises high-level APIs.
+TCP/IP comprises the application, transport, network, data link and the physical layer.
+3. What are the pros and cons of cross layer design?
+Messages can be sent between layers, cross-layer design has adaptability to handle
+wireless communications, and there is increased efficiency as data does not need to
+be processed in every layer. However, there might be stability issues if it is not
+handled well.
+Cross layer design can introduce stability issues and undesirable dependencies
+amongst layers if implemented without proper planning. However, Cross layer design
+can help improve performance if implemented properly and carefully.
+4. I characterized Packet Switching and the End-to-End principle as the two key
+design choices for the Internet. Describe them.
+Packet Switching : message is broken into a number of parts which are sent
+independently, over whatever route is optimum for each packet, and reassembled at
+the destination.
+End to End Principle: removes critical components from intermediary
+communications nodes in order to increase routing options, improve data delivery
+rates and make sure applications only fail if the end point fails.
+Packet switching is essentially what enables the Internet to accommodate the huge
+number of users it has in present days. On the other hand, the general idea of the
+end-to-end principle is to keep things simple. Since the end points of the network are
+well-equipped to handle failure, there is no point in adding resiliency features to every
+node in the intermediate network. In fact, having more complicated intermediate parts
+can make them more prone to failures.
+5. At what layer does ARQ exist? At what layer does TCP exist? Compare them in
+terms of how they provide reliability.
+ARQ: Layer 2 (Data-Link)
+TCP: Layer 4 (Transport)
+ARQ provides hop-to-hop (link) reliability while TCP provides end-to-end reliability.
+ARQ is an error-control method for data transmission that uses acknowledgements
+and timeouts to achieve reliable data transmission over an unreliable service. ARQ
+protocols include Stop-and-wait ARQ, Go-Back-N ARQ, and Selective Reject ARQ.
+These protocols reside in the data link and transport layer of the OSI model since
+these layers (as seen in Question 2) are responsible for the reliable transmission of
+data packets.
+TCP is a standard that defines how to establish and maintain a network conversation
+through which application programs can exchange data. TCP works with the Internet
+Protocol (IP), which defines how computers send packets of data to each other. TCP
+exists in the transport layer of the OSI model.
+ARQ at the data link layer ensures hop-to-hop (between any 2 nodes connected over
+a physical medium) reliability. On the other hand, TCP employs a variant of ARQ to
+ensure end-to-end (between any 2 end systems in a network) reliability.
+6. Describe the hierarchical structure and addressing of the Internet
+Every device connected to the internet has a unique IP address provided by an ISP.
+Communication between two devices are done through the hierarchy of ISPs. For
+example, Device A transmit a message up to the local ISP, which forwards up to the
+regional ISP, forwarding up further if needed. It is then forwarded down to Device’s B
+local ISP and then Device B.
+Private IP: 192, 10, 172
+As seen in the above figure, the Internet is essentially a hierarchy structure of
+networks that allows one end system to connect to another end system, despite both
+being at different geographical locations. There are 3 main tiers, namely the local
+ISPs, regional ISPs, and national ISPs.
+1. Local ISPs provide services to local homes or small offices or individuals.
+2. Regional ISPs provide access to local ISPs. They also provide (lease)
+dedicated ISP links to some big organisations.
+3. National ISPs are the backbone of the internet service provider and they
+connect to the internet directly. They provide access services to regional ISPs
+or local ISPs.
+Every end system connected to the internet has a unique IP address provided by an
+ISP. A single IP address can contain information about the network and its
+sub-network and ultimately the host. This scheme enables the IP Address to be
+hierarchical where a network can have many sub-networks, which in turn can have
+many hosts.
+7. Explain the trade-off between Packet Switching and Circuit Switching?
+Analogy
+Circuit switching – restaurant that takes reservations exclusively. One must call in
+advance, and the restaurant will assess the number of available tables. If all are
+reserved, one will be denied a table. However, if one gets the reservation, one will be
+assured that there will be no wait time when one arrives at the restaurant.
+Packet Switching – restaurant that doesn’t take any reservations. One doesn’t have
+to call in advance, and one can be seated at a table once any of them free up.
+However, the time one may have to wait is unpredictable (in the event the restaurant
+is full).
+8. Why do we have both MAC & IP Addresses?
+Both addresses are unique. IP addresses can be routed and are used to travel long
+distances in the local area network while MAC addresses are utilised in addressing
+hosts and cannot be routed, handling the physical connection from computer to
+computer.
+Theoretically, we do not require both MAC and IP addresses to build a network. In
+other words, we can build a communication network with only IP or MAC addresses.
+In this case, a communication network with IP addresses will be less complex (and
+hence more superior) compared to the latter. This is because an IP address is
+hierarchical (see Question 6) in nature while a MAC address is flat in nature. This
+results in a smaller and more manageable routing table in a huge network that uses
+IP addresses exclusively compared to that of a huge network that uses MAC
+addresses exclusively.
+Having said that, modern networks still use both MAC and IP addresses. In this case,
+IP addresses are used for long distance communication (with external networks)
+while MAC addresses are used in the local area network to address hosts within said
+network. This is purely for efficiency reasons since data packets not addressed to a
+particular host (which forms the majority of the packets received) can be dropped
+quicker by the host in layer 2 (where MAC addresses reside) than in layer 3 (where
+IP addresses reside). This net gain in efficiency turns out to be quite significant.
+9. In setting up a network, should you use a switch or a router? Describe the pros
+and cons.
+Use both, Connect router to switch to network.
+Switch: Allows only two nodes to connect (Not 2 only, it has up to 28 ports, means up
+to 28 nodes)
+Router: Allows multiple nodes to connect to a network
+TW: Switch is better for LAN use as the router costs more. When it comes to WAN,
+the router is better than the switch as the router has the routing capability to translate
+private to public ip addresses in order to communicate with other networks.
+https://askleo.com/whats_the_difference_between_a_hub_a_switch_and_a_router/
+A switch is essentially a networking hardware that connects devices on a network by
+using packet switching to receive and forward data to the destination device. It
+operates at the data link layer, and it uses MAC addresses to forward data to other
+devices within the network.
+A router, on the other hand, is a networking hardware that forwards data packets
+between computer networks. It operates at the network layer, and it uses IP
+addresses to forward data to other networks.
+If the network is small (i.e. local area network), a switch can be used for the
+communication between devices. However, if there is a need for these devices to
+communicate with external networks, an edge router would be required.
+1. A router is generally costlier than a network switch.
+2. A router can work with both wired and wireless network requirements while
+a network switch is restricted to wired network connections only.
+3. A router offers Network Address Translation (NAT), NetFlow, and QoS
+services while a network switch doesn’t. Hence, a router offers better
+performance than a network switch.
+10. Think about security in layer 2 and layer 3. What kind of attacks are there at
+layer 2 and layer 3? Hint: Lookup the broadcast storm, ARP/switch poisoning,
+and Denial of Service.
+A broadcast storm is an abnormally high number of broadcast packets within a
+short period of time. A broadcast storm can overwhelm switches and endpoints as
+they struggle to keep up with processing the flood of packets. When this happens,
+network performance degrades. Layer 2
+ARP spoofing is a technique by which an attacker sends spoofed ARP messages
+onto a local area network.The aim is to associate the attacker's MAC address with
+the IP address of another host, causing any traffic meant for that IP address to be
+sent to the attacker instead. Layer 2
+A denial-of-service (DoS) attack is a type of cyber attack in which a malicious actor
+aims to render a computer or other device unavailable to its intended users by
+interrupting the device's normal functioning. DoS attacks typically function by
+overwhelming or flooding a targeted machine with requests until normal traffic is
+unable to be processed, resulting in denial-of-service to ordinary users. Layer 3
+Two main categories:
+1) Buffer overflow attacks
+An attack type in which a memory buffer overflow can cause a machine to
+consume all available hard disk space, memory, or CPU time. This form of
+exploit often results in sluggish behavior, system crashes, or other deleterious
+server behaviors, resulting in denial-of-service.
+2) Flood attacks
+By saturating a targeted server with an overwhelming amount of packets, a
+malicious actor is able to oversaturate server capacity, resulting in
+denial-of-service. In order for most DoS flood attacks to be successful, the
+malicious actor must have more available bandwidth than the target.

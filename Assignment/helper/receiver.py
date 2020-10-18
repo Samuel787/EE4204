@@ -1,3 +1,4 @@
+CRC = "1011010010101111"
 
 def xor(a, b): 
     result = [] 
@@ -32,7 +33,7 @@ def decodeData(data, key):
 
 def Main():
     x = input("Enter the encoded message")
-    print(decodeData(x, "1101"))
+    print(decodeData(x, CRC))
 
 if __name__ == "__main__":
     Main()

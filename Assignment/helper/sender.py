@@ -1,3 +1,5 @@
+CRC = "1011010010101111"
+
 def xor(a, b): 
     result = [] 
     for i in range(1, len(b)): 
@@ -31,8 +33,8 @@ def encodeData(data, key):
     return codeword
 
 def Main():
-    x = input("Enter a message: \n")
-    print(encodeData(x, "1101"))
+    x = input("Enter a message:")
+    print(encodeData(x, CRC))
 
 
 if __name__ == "__main__":
