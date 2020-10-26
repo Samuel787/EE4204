@@ -8,7 +8,7 @@ NEGATIVE_ACK = "nack".encode("utf-8")
 PORT = [i for i in range(5000, 5050, 1)]
 HOST = "127.0.0.1"
 ACK_SIZE = 4
-PACKET_SIZE = 256
+# PACKET_SIZE = 256
 CRC = "10110100101011111011010010101111"
 
 PRINT_ENABLED = False
@@ -44,7 +44,7 @@ def decodeData(data, key):
     remainder = mod2div(appended_data, key) 
     return remainder 
 
-def RecvFile(sock):
+def RecvFile(sock, PACKET_SIZE):
     global_counter = 0
     start_time = time.time()
     file_size_correctly_received = False
@@ -114,8 +114,10 @@ def RecvFile(sock):
 
     end_time = time.time()
     print("File successfully received complete")
-    through_put = calculate_throughput(file_size, (end_time - start_time))
+    transfer_time = end_time - start_time
+    through_put = calculate_throughput(file_size, transfer_time)
     f.close()
+    return transfer_time, through_put
 
 # in Mbps
 def calculate_throughput(file_size, transfer_time):
@@ -123,7 +125,6 @@ def calculate_throughput(file_size, transfer_time):
     print(f"Transfer time: {transfer_time}s")
     print(f"Through_put: {through_put}")
     return through_put
-
 
 def check_crc_addition(crc_header):
     for i in range(len(crc_header)):
@@ -134,19 +135,30 @@ def check_crc_addition(crc_header):
     return True
 
 def Main():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        s.bind((HOST, PORT[0]))
-    except Exception as e:
-        print(e)
-        s.bind((HOST, PORT[1]))
-    print("Server started.")
-    s.listen(1)
+    automate_range_error_probability = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    automate_range_packet_size = [128, 512, 1024, 2048, 4096]
+    repeat_num = 3
+    for i in automate_range_packet_size:
+        for j in range(repeat_num):
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                s.bind((HOST, PORT[0]))
+            except Exception as e:
+                print(e)
+                s.bind((HOST, PORT[1]))
+            print("Server started.")
+            s.listen(1)
+            c, addr = s.accept()
+            print(f"Client connected ip: {addr}")
+            transfer_time, throughput = RecvFile(c, i)
+            s.close()
 
-    c, addr = s.accept()
-    print(f"Client connected ip: {addr}")
-    RecvFile(c)
-    s.close()
+            f = open("experiment_results_0-5_error_pkt_size.txt", "a")
+            string_to_write = str(i) + " " + str(transfer_time) + " " + str(throughput) + "\n"
+            f.write(string_to_write)
+            f.close()
+
+
 
 if __name__ == "__main__":
     Main()

@@ -11,10 +11,10 @@ FILE_TO_SENT = "final.txt"
 POSITIVE_ACK = "pack".encode("utf-8")
 NEGATIVE_ACK = "nack".encode("utf-8")
 ACK_SIZE = 4
-PACKET_SIZE = 256
+# PACKET_SIZE = 256
 CRC = "10110100101011111011010010101111"
 CORRUPT_INTENSITY = 0.05 # fix this at 0.05
-ERROR_PROBABILITY = 0
+# ERROR_PROBABILITY = 0
 PACKET_LOSS_PROBABILITY = 0
 
 PRINT_ENABLED = False
@@ -51,7 +51,7 @@ def encodeData(data, key):
     codeword = data + remainder 
     return codeword
 
-def SendFile():
+def SendFile(ERROR_PROBABILITY, PACKET_SIZE):
     global_counter = 0
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setblocking(True)
@@ -167,12 +167,19 @@ def corrupt_data(message, corrupt_intensity):
     return new_message
 
 def Main():
-    if(CORRUPT_INTENSITY > 1 or CORRUPT_INTENSITY < 0):
-        print("CORRUPT_INTENSITY Should be between 0 and 1")
-    if(ERROR_PROBABILITY > 1 or ERROR_PROBABILITY < 0):
-        print("ERROR PROBABILITY shoudl be between 0 and 1")
-    random.seed(time.time())
-    SendFile()
+    # if(CORRUPT_INTENSITY > 1 or CORRUPT_INTENSITY < 0):
+    #     print("CORRUPT_INTENSITY Should be between 0 and 1")
+    # if(ERROR_PROBABILITY > 1 or ERROR_PROBABILITY < 0):
+    #     print("ERROR PROBABILITY shoudl be between 0 and 1")
+
+    automate_range_error_probability = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    automate_range_packet_size = [128, 512, 1024, 2048, 4096]
+    repeat_num = 3
+    for i in automate_range_packet_size:
+        for j in range(repeat_num):
+            random.seed(time.time())
+            SendFile(0.5, i)
+            time.sleep(5)
 
 if __name__ == "__main__":
     Main()
