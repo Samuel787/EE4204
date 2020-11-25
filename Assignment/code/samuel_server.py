@@ -49,14 +49,17 @@ def RecvFile(sock):
     start_time = time.time()
     file_size_correctly_received = False
     ack_num = -1
+    seq_num = 0
     while not file_size_correctly_received:
         file_size = sock.recv(1024)
         try:
             file_size = file_size.decode("utf-8")
+            file_seq_num = int(file_size[-1])
+            file_size = file_size[0:len(file_size) - 1]
             if PRINT_ENABLED:
                 print(f"Received file size {file_size}")
             remainder = decodeData(file_size, CRC)
-            if int(remainder) != 0:
+            if int(remainder) != 0 and file_seq_num == seq_num:
                 raise Exception("file size received wrongly")
             file_size = file_size[:-(len(CRC) - 1)]
             file_size = int(file_size)
@@ -82,12 +85,15 @@ def RecvFile(sock):
 
     received_size = 0
     f = open("Received_file.txt", "wb")
+    seq_num += 1
     while received_size < file_size:
         file_content_correctly_received = False
         while not file_content_correctly_received:
             data = sock.recv(PACKET_SIZE)
             if data:
                 data = data.decode("utf-8")
+                seq_num_received = int(data[-1])
+                data = data[0: len(data) - 1]
                 if PRINT_ENABLED:
                     print(f"Received: {data}")
                 crc_header = data[-(len(CRC) - 1):]
@@ -95,11 +101,12 @@ def RecvFile(sock):
                     print(f"crc header: {crc_header}")
                 crc_header_valid = check_crc_addition(crc_header)
                 remainder = decodeData(data, CRC)
-                if crc_header_valid and int(remainder) == 0:
+                if crc_header_valid and int(remainder) == 0 and seq_num_received == (seq_num % 10):
                     file_content_correctly_received = True
                 if file_content_correctly_received:
                     data = data[:-(len(CRC) - 1)]
                     received_size += PACKET_SIZE - len(CRC) + 1#len(data)
+                    seq_num += 1
                     if PRINT_ENABLED:
                         print(f"Received this much data so far: {received_size}")
                     f.write(data.encode("utf-8"))

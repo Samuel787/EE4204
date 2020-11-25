@@ -62,6 +62,7 @@ def SendFile():
         s.connect((HOST, PORT[1]))
 
     ack_num = 0
+    seq_num = 0
     file_size_correctly_sent = False
     while not file_size_correctly_sent:
         file_size = os.path.getsize(FILE_TO_SENT)
@@ -70,6 +71,7 @@ def SendFile():
         if PRINT_ENABLED:
             print(f"Sending file size msg: {filesize}")
         filesize = pre_process_before_send(filesize, CORRUPT_INTENSITY, ERROR_PROBABILITY)
+        filesize += str(seq_num)
         filesize = filesize.encode("utf-8")
         s.send(filesize)
         while True:
@@ -99,7 +101,8 @@ def SendFile():
     with open(FILE_TO_SENT, "rb") as f:
         while sent_size < file_size:
             file_content_correctly_sent = False
-            bytesToSend = f.read(PACKET_SIZE - len(CRC) + 1)
+            bytesToSend = f.read(PACKET_SIZE - len(CRC))
+            seq_num += 1
             if PRINT_ENABLED:
                 print(f"bytesToSend: {bytesToSend}")
             temp = copy.copy(bytesToSend)
@@ -110,6 +113,7 @@ def SendFile():
                 if PRINT_ENABLED:
                     print(f"Sending file content msg: {bytesToSend}")
                 bytesToSend = pre_process_before_send(bytesToSend, CORRUPT_INTENSITY, ERROR_PROBABILITY)
+                bytesToSend += str(seq_num % 10)
                 bytesToSend = bytesToSend.encode("utf-8")
                 if random.random() >= PACKET_LOSS_PROBABILITY:
                     s.send(bytesToSend)
@@ -123,7 +127,8 @@ def SendFile():
                         ack = ack.decode("utf-8")
                         ack_num_received = int(ack[-1])
                         ack = ack[0:4]
-                        print(f"Ack num received: {ack_num_received}")
+                        if PRINT_ENABLED:
+                            print(f"Ack num received: {ack_num_received}")
                         if ack == POSITIVE_ACK and ack_num_received == (ack_num % 10):
                             ack_num += 1
                             sent_size += (PACKET_SIZE - len(CRC) + 1)

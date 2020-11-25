@@ -14,11 +14,12 @@ ACK_SIZE = 4
 PACKET_SIZE = 256
 CRC = "10110100101011111011010010101111"
 CORRUPT_INTENSITY = 0.05 # fix this at 0.05
-ERROR_PROBABILITY = 0
+ERROR_PROBABILITY = 0.5
 PACKET_LOSS_PROBABILITY = 0
 
 PRINT_ENABLED = False
 
+# used for CRC calculations
 def xor(a, b): 
     result = [] 
     for i in range(1, len(b)): 
@@ -28,6 +29,7 @@ def xor(a, b):
             result.append('1') 
     return ''.join(result) 
 
+# used for CRC calculations
 def mod2div(divident, divisor): 
     pick = len(divisor) 
     tmp = divident[0 : pick]  
@@ -44,6 +46,7 @@ def mod2div(divident, divisor):
     checkword = tmp 
     return checkword
 
+# appends the CRC to the data to be sent
 def encodeData(data, key): 
     l_key = len(key)  
     appended_data = data + '0'*(l_key-1) 
@@ -51,8 +54,11 @@ def encodeData(data, key):
     codeword = data + remainder 
     return codeword
 
+# sends the file over to the server using Stop and Wait ARQ
 def SendFile():
     global_counter = 0
+
+    # creates a TCP socket and connects to the server
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setblocking(True)
     try:
@@ -61,18 +67,22 @@ def SendFile():
         print(e)
         s.connect((HOST, PORT[1]))
 
-    
+    # while loop to send over the file size first using stop and wait
     file_size_correctly_sent = False
     while not file_size_correctly_sent:
+        # repeatedly sends file size until it is correctly received 
         file_size = os.path.getsize(FILE_TO_SENT)
         filesize = str(file_size)
         filesize = encodeData(filesize, CRC)
         if PRINT_ENABLED:
             print(f"Sending file size msg: {filesize}")
+        # with some error probability, this packet might get corrupted
         filesize = pre_process_before_send(filesize, CORRUPT_INTENSITY, ERROR_PROBABILITY)
         filesize = filesize.encode("utf-8")
+        # send this data through the socket
         s.send(filesize)
         while True:
+            # receives the acknowledgement from server
             ack = s.recv(ACK_SIZE)
             if ack == POSITIVE_ACK:
                 if PRINT_ENABLED:
@@ -90,27 +100,35 @@ def SendFile():
         if PRINT_ENABLED:
             print(str(global_counter))
 
+    # keeps track of file size that's sent out
     sent_size = 0
     with open(FILE_TO_SENT, "rb") as f:
         while sent_size < file_size:
+            # prepares the content to be transmitted out
             file_content_correctly_sent = False
             bytesToSend = f.read(PACKET_SIZE - len(CRC) + 1)
             if PRINT_ENABLED:
                 print(f"bytesToSend: {bytesToSend}")
             temp = copy.copy(bytesToSend)
+            # stop and wait implemented here. Content is repeatedly sent until properly sent
             while not file_content_correctly_sent:
                 if temp == "":
                     break
+                # packet is prepared
                 bytesToSend = encodeData(temp.decode("utf-8"), CRC)
                 if PRINT_ENABLED:
                     print(f"Sending file content msg: {bytesToSend}")
                 bytesToSend = pre_process_before_send(bytesToSend, CORRUPT_INTENSITY, ERROR_PROBABILITY)
                 bytesToSend = bytesToSend.encode("utf-8")
+                
+                # packet is transmitted here
                 if random.random() >= PACKET_LOSS_PROBABILITY:
                     s.send(bytesToSend)
                 else:
                     if PRINT_ENABLED:
                         print("Simulating packet loss")
+
+                # wait for acknowledgement. If NACK, send again
                 while True:
                     s.settimeout(0.1)
                     try:
@@ -151,8 +169,10 @@ def SendFile():
 #             new_message += message[i]
 #     return new_message
 
+# function for data corruption
 def pre_process_before_send(message, corrupt_intensity, error_probability):
     val = random.random()
+    # corrupt a packet with an error_probability
     if val <= error_probability:
         message = corrupt_data(message, corrupt_intensity)
     return message
